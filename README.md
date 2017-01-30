@@ -20,7 +20,7 @@ Make sure the DNS records gets pointed towards the server which runs the nginx i
 $ renew test.example.com
 ```
 if no nginx configuration is located in **/etc/nginx/sites-available** then you will be
-prompted with a message asking you if you which to create this vhost.
+prompted with a message asking you if you wish to create this vhost.
 
 After confirmation, step-1 will be copied and named the same name as the parameter.
 Nginx gets reloaded, a configuration gets placed in **/etc/letsencrypt** with the same name as the parameter.
