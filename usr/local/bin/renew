@@ -8,6 +8,7 @@ DOMAIN="$1"
 
 if [ "$1" == "" ]; then
 	echo "Expecting a domain";
+	exit 1;
 fi
 
 RECLAIM_EMAIL=""
