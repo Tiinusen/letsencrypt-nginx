@@ -33,7 +33,7 @@ When that is done, step-2 will be copied and overwrite the previous configuratio
 $ renew test.example.com
 ```
 if a nginx configuration is present, the renewal script will check if a letsencrypt configuration
-is located in /etc/letsencrypt and if not, one will be created.
+is located in **/etc/letsencrypt** and if not, one will be created.
 Afterwards the renewal script will check if a certificate is present, if not letsencrypt will be called for creation of the certificate.
 
 ## Usage #3 (renewal of certificate)
