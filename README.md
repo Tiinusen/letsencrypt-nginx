@@ -45,3 +45,6 @@ script will just present the days left until expiration. if the certificate is e
 
 ## Thats it
 Feel free to improve this solution, grammar, explanation. Fork it and create a pull request.
+
+## Star it
+If this solution helped you on your way towards secure hosting, star it :)
