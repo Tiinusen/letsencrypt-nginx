@@ -10,7 +10,7 @@ First of all, you need to have **nginx**, **letsencrypt**, **bc** installed for 
 
 Afterwards, just follow the folder structure in this repo and make sure those folders and files is placed in the proper structure in root (/).
 
-Then in **/usr/local/bin/renew** add a reclaim email address before proceeding.
+Then in **/usr/local/bin/renew** add a reclaim email address and make the file executable.
 
 ## Before use
 Make sure the DNS records gets pointed towards the server which runs the nginx instance.
@@ -23,7 +23,7 @@ if no nginx configuration is located in **/etc/nginx/sites-available** then you 
 prompted with a message asking you if you which to create this vhost.
 
 After confirmation, step-1 will be copied and named the same name as the parameter.
-Nginx gets reloaded, a configuration gets placed in /etc/letsencrypt with the same name as the parameter.
+Nginx gets reloaded, a configuration gets placed in **/etc/letsencrypt** with the same name as the parameter.
 Letsencrypt gets called and certificates gets created.
 
 When that is done, step-2 will be copied and overwrite the previous configuration and nginx gets reloaded once again, and now you should see that your domain has SSL in the browser.
