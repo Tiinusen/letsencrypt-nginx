@@ -1,0 +1,88 @@
+#!/bin/bash
+if [ "$(id -u)" != "0" ]; then
+   sudo $0 $@
+   exit 0
+fi
+
+DOMAIN="$1"
+
+if [ "$1" == "" ]; then
+	echo "Expecting a domain";
+fi
+
+RECLAIM_EMAIL=""
+NGINX_CONFIG="/etc/nginx/sites-available/$DOMAIN"
+WWW_PATH="/var/www/letsencrypt/$DOMAIN"
+CONFIG_DIR="/etc/letsencrypt/$DOMAIN"
+CONFIG_FILE="/etc/letsencrypt/$DOMAIN.letsencrypt"
+CERT_FILE="/etc/letsencrypt/$DOMAIN/live/$DOMAIN/fullchain.pem"
+EXP_LIMIT=30
+
+if [ ! -e $NGINX_CONFIG ]; then
+	echo "There is no vhost configuration"
+	read -p "Do you wish to create a new one (Y/n)? " -r
+	if [ "$REPLY" != "Y" ]; then
+		echo "Aborted"
+		exit 1
+	fi
+
+	if [ ! -e $WWW_PATH ]; then
+		mkdir $WWW_PATH
+		mkdir $WWW_PATH/.well-known
+		echo "$DOMAIN" > $WWW_PATH/.well-known/test.html
+	fi
+
+	if [ ! -e $CONFIG_DIR ]; then
+		mkdir $CONFIG_DIR
+	fi
+
+	if [ ! -e $CONFIG_FILE ]; then
+		echo "rsa-key-size = 4096" >> $CONFIG_FILE
+		echo "domains = $DOMAIN" >> $CONFIG_FILE
+		echo "email = $RECLAIM_EMAIL" >> $CONFIG_FILE
+		echo "text = True" >> $CONFIG_FILE
+		echo "authenticator = webroot" >> $CONFIG_FILE
+		echo "webroot-path = /var/www/letsencrypt/$DOMAIN/" >> $CONFIG_FILE
+	fi
+
+	touch $NGINX_CONFIG
+	ln -s $NGINX_CONFIG /etc/nginx/sites-enabled/$DOMAIN
+
+	if [ ! -e $CERT_FILE ]; then
+		cp /etc/nginx/sites-available/step-1 $NGINX_CONFIG
+		sed -i 's,PLACEHOLDER,'"$DOMAIN"',' $NGINX_CONFIG
+		service nginx reload
+		/usr/bin/letsencrypt certonly -a webroot --agree-tos --renew-by-default --config-dir=$CONFIG_DIR/ --config $CONFIG_FILE
+		cp /etc/nginx/sites-available/step-2 $NGINX_CONFIG
+		sed -i 's,PLACEHOLDER,'"$DOMAIN"',' $NGINX_CONFIG
+		sed -i 's,PLACEHOLDER,'"$DOMAIN"',' $NGINX_CONFIG
+		service nginx reload
+		echo "Certificate has been created"
+	fi
+	echo "Vhost created"
+	exit 0
+fi
+
+if [ ! -e $WWW_PATH ]; then
+	mkdir $WWW_PATH
+	mkdir $WWW_PATH/.well-known
+fi
+
+if [ ! -e $CONFIG_DIR ]; then
+	mkdir $CONFIG_DIR
+fi
+
+if [ -e $CERT_FILE ]; then
+	EXP=$(date -d "`openssl x509 -in $CERT_FILE -text -noout|grep "Not After"|cut -c 25-`" +%s)
+	DATENOW=$(date -d "now" +%s)
+	DAYS_EXP=$(echo \( $EXP - $DATENOW \) / 86400 |bc)
+
+	if [ "$DAYS_EXP" -gt "$EXP_LIMIT" ]; then
+		echo "The certificate is up to date, no need for renewal ($DAYS_EXP days left)."
+        	exit 0;
+	fi
+fi
+
+/usr/bin/letsencrypt certonly -a webroot --agree-tos --renew-by-default --config-dir=$CONFIG_DIR/ --config $CONFIG_FILE
+echo "Certificate has been renewed"
+exit 0

@@ -1,0 +1,19 @@
+server {
+        listen 80;
+
+        server_name PLACEHOLDER;
+
+        root /var/www/html;
+
+        index index.html;
+
+
+        location / {
+                return 302 https://PLACEHOLDER$request_uri;
+        }
+
+        location ~ /.well-known {
+                root /var/www/letsencrypt/PLACEHOLDER/;
+                allow all;
+        }
+}
